@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grinding Cycle Time Study</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+        nav {
+            background-color: #555;
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 16px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .hidden {
+            display: none;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+    <script>
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        function updateForm() {
+            const grindingType = document.getElementById('grindingType').value;
+            const formDiv = document.getElementById('formFields');
+            formDiv.innerHTML = '';
+
+            if (grindingType === 'cylindrical') {
+                formDiv.innerHTML = `
+                    <label for="cylindricalType">Select Operation:</label>
+                    <select id="cylindricalType" onchange="updateCylindricalForm()">
+                        <option value="outerDiameter">Outer Diameter</option>
+                        <option value="innerDiameter">Inner Diameter</option>
+                        <option value="tapering">Tapering</option>
+                    </select>
+                    <div id="cylindricalFields"></div>
+                `;
+            } else if (grindingType === 'surface') {
+                formDiv.innerHTML = `
+                    <label for="stock">Stock (mm):</label><input type="number" id="stock" required>
+                    <label for="speed">Speed (RPM):</label><input type="number" id="speed" required>
+                    <label for="feedrate">Feedrate (mm/min):</label><input type="number" id="feedrate" required>
+                    <label for="depthOfCut">Depth of Cut (mm):</label><input type="number" id="depthOfCut" required>
+                    <label for="depthPerPass">Depth per Pass (mm):</label><input type="number" id="depthPerPass" required>
+                    <button onclick="calculateSurfaceTime()">Calculate</button>
+                `;
+            }
+        }
+
+        function updateCylindricalForm() {
+            const cylindricalType = document.getElementById('cylindricalType').value;
+            const cylindricalFields = document.getElementById('cylindricalFields');
+            cylindricalFields.innerHTML = '';
+
+            if (cylindricalType === 'outerDiameter' || cylindricalType === 'innerDiameter') {
+                cylindricalFields.innerHTML = `
+                    <label for="stock">Stock (mm):</label><input type="number" id="stock" required>
+                    <label for="speed">Speed (RPM):</label><input type="number" id="speed" required>
+                    <label for="feedrate">Feedrate (mm/min):</label><input type="number" id="feedrate" required>
+                    <label for="diameter">Diameter (mm):</label><input type="number" id="diameter" required>
+                    <label for="length">Length (mm):</label><input type="number" id="length" required>
+                    <button onclick="calculateCylindricalTime()">Calculate</button>
+                `;
+            } else if (cylindricalType === 'tapering') {
+                cylindricalFields.innerHTML = `
+                    <label for="length">Length (mm):</label><input type="number" id="length" required>
+                    <label for="majorDiameter">Major Diameter (mm):</label><input type="number" id="majorDiameter" required>
+                    <label for="minorDiameter">Minor Diameter (mm):</label><input type="number" id="minorDiameter" required>
+                    <label for="feedrate">Feedrate (mm/min):</label><input type="number" id="feedrate" required>
+                    <label for="speed">Speed (RPM):</label><input type="number" id="speed" required>
+                    <button onclick="calculateTaperingTime()">Calculate</button>
+                `;
+            }
+        }
+
+        function calculateCylindricalTime() {
+            const stock = parseFloat(document.getElementById('stock').value);
+            const speed = parseFloat(document.getElementById('speed').value);
+            const feedrate = parseFloat(document.getElementById('feedrate').value);
+            const diameter = parseFloat(document.getElementById('diameter').value);
+            const length = parseFloat(document.getElementById('length').value);
+
+            const time = (stock / (feedrate * ((60 * speed) / (Math.PI * diameter * length)))) * 10;
+            document.getElementById('result').innerHTML = `Machining Time: ${time.toFixed(2)} minutes`;
+        }
+
+        function calculateTaperingTime() {
+            const length = parseFloat(document.getElementById('length').value);
+            const majorDiameter = parseFloat(document.getElementById('majorDiameter').value);
+            const minorDiameter = parseFloat(document.getElementById('minorDiameter').value);
+            const feedrate = parseFloat(document.getElementById('feedrate').value);
+            const speed = parseFloat(document.getElementById('speed').value);
+
+            const time = Math.sqrt((length ** 2) + (((majorDiameter - minorDiameter) / 2) ** 2)) / (feedrate * speed);
+            document.getElementById('result').innerHTML = `Machining Time: ${time.toFixed(2)} minutes`;
+        }
+
+        function calculateSurfaceTime() {
+            const stock = parseFloat(document.getElementById('stock').value);
+            const speed = parseFloat(document.getElementById('speed').value);
+            const feedrate = parseFloat(document.getElementById('feedrate').value);
+            const depthOfCut = parseFloat(document.getElementById('depthOfCut').value);
+            const depthPerPass = parseFloat(document.getElementById('depthPerPass').value);
+
+            const time = (stock * (depthOfCut / depthPerPass)) / (feedrate * speed);
+            document.getElementById('result').innerHTML = `Machining Time: ${time.toFixed(2)} minutes`;
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Grinding Cycle Time Study</h1>
+    </header>
+    <nav>
+        <a href="#" onclick="showPage('home')">Home</a>
+        <a href="#" onclick="showPage('aboutUs')">About Us</a>
+        <a href="#" onclick="showPage('services')">Services</a>
+        <a href="#" onclick="showPage('contact')">Contact</a>
+    </nav>
+
+    <div class="content">
+        <div id="home" class="page">
+            <h2>Welcome</h2>
+            <p>Select a page from the navigation menu.</p>
+        </div>
+
+        <div id="aboutUs" class="page hidden">
+            <h2>About Us</h2>
+            <p>Welcome to the Ultimate Grinding Optimization Platform.<br>
+               This project is designed to empower manufacturers, engineers, and researchers to calculate the exact cycle time for grinding operations on tungsten carbide. By leveraging a proven formula and critical grinding parameters, our platform helps optimize the grinding process, reduce costs, and improve overall efficiency.
+            </p>
+        </div>
+
+        <div id="services" class="page hidden">
+            <h2>Services</h2>
+            <label for="grindingType">Type of Grinding Operation:</label>
+            <select id="grindingType" onchange="updateForm()">
+                <option value="">-- Select --</option>
+                <option value="cylindrical">Cylindrical Grinding</option>
+                <option value="surface">Surface Grinding</option>
+            </select>
+            <div id="formFields"></div>
+            <div id="result"></div>
+        </div>
+
+        <div id="contact" class="page hidden">
+            <h2>Contact</h2>
+            <p>Mobile: 8073784551</p>
+            <p>Email: sanjayshetty2742@gmail.com</p>
+        </div>
+    </div>
+</body>
+</html>
