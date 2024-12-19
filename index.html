@@ -86,8 +86,8 @@
                     <label for="surface-length">Length (mm):</label>
                     <input type="number" id="surface-length" name="surface-length" min="0" required>
 
-                    <label for="surface-diameter">Diameter (mm):</label>
-                    <input type="number" id="surface-diameter" name="surface-diameter" min="0" required>
+                    <label for="surface-width">Width (mm):</label>
+                    <input type="number" id="surface-width" name="surface-width" min="0" required>
 
                     <label for="surface-feed-rate">Feed Rate (mm/min):</label>
                     <input type="number" id="surface-feed-rate" name="surface-feed-rate" min="0" required>
@@ -162,10 +162,19 @@
                 }
 
                 // Perform calculation based on operation type
-                if (operation === 'od' || operation === 'id' || operation === 'surface') {
+                if (operation === 'od') {
+                    // Formula for OD Grinding
                     result = (length * diameter) / (feedRate * speed);
+                } else if (operation === 'id') {
+                    // Formula for ID Grinding
+                    result = (length * diameter) / (feedRate * speed * 2);
                 } else if (operation === 'tapering') {
+                    // Formula for Tapering Grinding
                     result = (length * (diameter + taperDiameter)) / (feedRate * speed);
+                } else if (operation === 'surface') {
+                    // Formula for Surface Grinding
+                    const width = parseFloat(document.getElementById('surface-width').value);
+                    result = (length * width) / (feedRate * speed);
                 }
 
                 // Display the result
