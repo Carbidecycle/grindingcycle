@@ -49,6 +49,11 @@ function calculateTime() {
 
     // Save calculated time
     calculatedTime = time.toFixed(2);
+
+    // Automatically refresh the page after calculation (only once the result is shown)
+    setTimeout(() => {
+        location.reload(); // This will reload the page after the result is displayed and download button appears
+    }, 5000);  // Delay to give user time to see the result
 }
 
 function downloadPDF() {
@@ -60,7 +65,9 @@ function downloadPDF() {
     doc.save('grinding_calculation_result.pdf');
 }
 
-// Automatically refresh the page when operation type is changed
+// Prevent page reload until calculation is done
 document.getElementById('operation-type').addEventListener('change', function() {
-    location.reload();
+    // Reset and hide result section after operation type change
+    document.getElementById('result').innerHTML = '';
+    document.getElementById('download-button').classList.add('hidden');
 });
