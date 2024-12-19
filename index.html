@@ -36,63 +36,64 @@
                     <option value="surface">Surface Grinding</option>
                 </select>
 
+                <!-- OD Parameters -->
                 <div id="od-parameters" class="hidden">
-                    <label for="length">Length (mm):</label>
-                    <input type="number" id="length" name="length" min="0" required>
+                    <label for="od-length">Length (mm):</label>
+                    <input type="number" id="od-length" name="od-length" min="0" required>
 
-                    <label for="diameter">Diameter (mm):</label>
-                    <input type="number" id="diameter" name="diameter" min="0" required>
+                    <label for="od-diameter">Diameter (mm):</label>
+                    <input type="number" id="od-diameter" name="od-diameter" min="0" required>
 
-                    <label for="feed-rate">Feed Rate (mm/min):</label>
-                    <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+                    <label for="od-feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="od-feed-rate" name="od-feed-rate" min="0" required>
 
-                    <label for="speed">Speed (rpm):</label>
-                    <input type="number" id="speed" name="speed" min="0" required>
+                    <label for="od-speed">Speed (rpm):</label>
+                    <input type="number" id="od-speed" name="od-speed" min="0" required>
                 </div>
 
+                <!-- ID Parameters -->
                 <div id="id-parameters" class="hidden">
-                    <label for="length">Length (mm):</label>
-                    <input type="number" id="length" name="length" min="0" required>
+                    <label for="id-length">Length (mm):</label>
+                    <input type="number" id="id-length" name="id-length" min="0" required>
 
-                    <label for="diameter">Diameter (mm):</label>
-                    <input type="number" id="diameter" name="diameter" min="0" required>
+                    <label for="id-diameter">Diameter (mm):</label>
+                    <input type="number" id="id-diameter" name="id-diameter" min="0" required>
 
-                    <label for="feed-rate">Feed Rate (mm/min):</label>
-                    <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+                    <label for="id-feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="id-feed-rate" name="id-feed-rate" min="0" required>
 
-                    <label for="speed">Speed (rpm):</label>
-                    <input type="number" id="speed" name="speed" min="0" required>
+                    <label for="id-speed">Speed (rpm):</label>
+                    <input type="number" id="id-speed" name="id-speed" min="0" required>
                 </div>
 
+                <!-- Tapering Parameters -->
                 <div id="tapering-parameters" class="hidden">
-                    <label for="length">Length (mm):</label>
-                    <input type="number" id="length" name="length" min="0" required>
+                    <label for="taper-length">Length (mm):</label>
+                    <input type="number" id="taper-length" name="taper-length" min="0" required>
 
-                    <label for="diameter">Diameter (mm):</label>
-                    <input type="number" id="diameter" name="diameter" min="0" required>
-
-                    <label for="taper-diameter">Taper Diameter (mm):</label>
+                    <label for="taper-diameter">Diameter (mm):</label>
                     <input type="number" id="taper-diameter" name="taper-diameter" min="0" required>
 
-                    <label for="feed-rate">Feed Rate (mm/min):</label>
-                    <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+                    <label for="taper-feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="taper-feed-rate" name="taper-feed-rate" min="0" required>
 
-                    <label for="speed">Speed (rpm):</label>
-                    <input type="number" id="speed" name="speed" min="0" required>
+                    <label for="taper-speed">Speed (rpm):</label>
+                    <input type="number" id="taper-speed" name="taper-speed" min="0" required>
                 </div>
 
+                <!-- Surface Parameters -->
                 <div id="surface-parameters" class="hidden">
-                    <label for="length">Length (mm):</label>
-                    <input type="number" id="length" name="length" min="0" required>
+                    <label for="surface-length">Length (mm):</label>
+                    <input type="number" id="surface-length" name="surface-length" min="0" required>
 
-                    <label for="diameter">Diameter (mm):</label>
-                    <input type="number" id="diameter" name="diameter" min="0" required>
+                    <label for="surface-diameter">Diameter (mm):</label>
+                    <input type="number" id="surface-diameter" name="surface-diameter" min="0" required>
 
-                    <label for="feed-rate">Feed Rate (mm/min):</label>
-                    <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+                    <label for="surface-feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="surface-feed-rate" name="surface-feed-rate" min="0" required>
 
-                    <label for="speed">Speed (rpm):</label>
-                    <input type="number" id="speed" name="speed" min="0" required>
+                    <label for="surface-speed">Speed (rpm):</label>
+                    <input type="number" id="surface-speed" name="surface-speed" min="0" required>
                 </div>
 
                 <button type="button" id="calculate-button" class="disabled" onclick="calculateTime()">Calculate</button>
@@ -109,6 +110,77 @@
     </footer>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const operationType = document.getElementById('operation-type');
+            const odParameters = document.getElementById('od-parameters');
+            const idParameters = document.getElementById('id-parameters');
+            const taperingParameters = document.getElementById('tapering-parameters');
+            const surfaceParameters = document.getElementById('surface-parameters');
+            const calculateButton = document.getElementById('calculate-button');
+            const resultDiv = document.getElementById('result');
+            const downloadButton = document.getElementById('download-button');
+
+            operationType.addEventListener('change', () => {
+                const operation = operationType.value;
+
+                // Hide all sections by default
+                odParameters.classList.add('hidden');
+                idParameters.classList.add('hidden');
+                taperingParameters.classList.add('hidden');
+                surfaceParameters.classList.add('hidden');
+
+                // Show the corresponding section based on the operation type selected
+                if (operation === 'od') {
+                    odParameters.classList.remove('hidden');
+                } else if (operation === 'id') {
+                    idParameters.classList.remove('hidden');
+                } else if (operation === 'tapering') {
+                    taperingParameters.classList.remove('hidden');
+                } else if (operation === 'surface') {
+                    surfaceParameters.classList.remove('hidden');
+                }
+            });
+
+            calculateButton.addEventListener('click', () => {
+                const operation = operationType.value;
+                let result = 0;
+
+                // Get values from the form depending on the selected operation
+                const length = parseFloat(document.getElementById(operation + '-length').value);
+                const diameter = parseFloat(document.getElementById(operation + '-diameter').value);
+                const feedRate = parseFloat(document.getElementById(operation + '-feed-rate').value);
+                const speed = parseFloat(document.getElementById(operation + '-speed').value);
+                let taperDiameter = 0;
+                if (operation === 'tapering') {
+                    taperDiameter = parseFloat(document.getElementById('taper-diameter').value);
+                }
+
+                // Perform calculation based on operation type
+                if (operation === 'od' || operation === 'id' || operation === 'surface') {
+                    result = (length * diameter) / (feedRate * speed);
+                } else if (operation === 'tapering') {
+                    result = (length * (diameter + taperDiameter)) / (feedRate * speed);
+                }
+
+                // Display the result
+                resultDiv.innerHTML = `<p>Calculated Time: ${result.toFixed(2)} minutes</p>`;
+
+                // Show the download button
+                downloadButton.classList.remove('hidden');
+            });
+
+            // Download the result as a PDF
+            window.downloadPDF = function () {
+                const pdfContent = `Grinding Operation Result\n\n${resultDiv.innerText}`;
+                const blob = new Blob([pdfContent], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'result.pdf';
+                a.click();
+            };
+        });
+
         function refreshPage() {
             window.location.reload();
         }
