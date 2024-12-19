@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbide Cycle</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav a {
+            color: #fff;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        form input, form select, button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        button#calculate-btn {
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+
+        button#calculate-btn.invalid {
+            transform: translateX(-10px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Carbide Cycle</h1>
+        <nav>
+            <a href="#about">About Us</a>
+            <a href="#calculator">Calculator</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="about">
+            <h2>About Us</h2>
+            <p>Welcome to the Ultimate Grinding Optimization Platform. This project is designed to empower manufacturers, engineers, and researchers to calculate the exact cycle time for grinding operations on tungsten carbide. By leveraging a proven formula and critical grinding parameters, our platform helps optimize the grinding process, reduce costs, and improve overall efficiency.</p>
+        </section>
+
+        <section id="calculator">
+            <h2>Machining Time Calculator</h2>
+
+            <form id="calculator-form">
+                <label for="operation-type">Type of Grinding Operation:</label>
+                <select id="operation-type" name="operation-type" required>
+                    <option value="">Select</option>
+                    <option value="cylindrical">Cylindrical Grinding</option>
+                    <option value="surface">Surface Grinding</option>
+                </select>
+
+                <div id="cylindrical-options" style="display: none;">
+                    <label for="cylindrical-type">Cylindrical Type:</label>
+                    <select id="cylindrical-type" name="cylindrical-type" required>
+                        <option value="">Select</option>
+                        <option value="outer">Outer Diameter</option>
+                        <option value="inner">Inner Diameter</option>
+                        <option value="tapering">Tapering</option>
+                    </select>
+
+                    <div id="cylindrical-params" style="display: none;">
+                        <label for="length">Length (mm):</label>
+                        <input type="number" id="length" name="length" min="0" required>
+
+                        <label for="major-diameter">Major Diameter (mm):</label>
+                        <input type="number" id="major-diameter" name="major-diameter" min="0" required>
+
+                        <label for="minor-diameter">Minor Diameter (mm):</label>
+                        <input type="number" id="minor-diameter" name="minor-diameter" min="0" required>
+
+                        <label for="wheel-speed">Wheel Speed (rpm):</label>
+                        <input type="number" id="wheel-speed" name="wheel-speed" min="0" required>
+
+                        <label for="feed-rate">Feed Rate (mm/min):</label>
+                        <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+
+                        <label for="spindle-speed">Spindle Speed (rpm):</label>
+                        <input type="number" id="spindle-speed" name="spindle-speed" min="0" required>
+                    </div>
+                </div>
+
+                <div id="surface-options" style="display: none;">
+                    <label for="surface-length">Length (mm):</label>
+                    <input type="number" id="surface-length" name="surface-length" min="0" required>
+
+                    <label for="width">Width (mm):</label>
+                    <input type="number" id="width" name="width" min="0" required>
+
+                    <label for="table-speed">Table Speed (rpm):</label>
+                    <input type="number" id="table-speed" name="table-speed" min="0" required>
+
+                    <label for="surface-feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="surface-feed-rate" name="surface-feed-rate" min="0" required>
+
+                    <label for="depth-of-cut">Depth of Cut (mm):</label>
+                    <input type="number" id="depth-of-cut" name="depth-of-cut" min="0" required>
+                </div>
+
+                <button id="calculate-btn" disabled>Know The Time</button>
+            </form>
+
+            <div id="result" style="display: none;">
+                <h3>Calculation Result</h3>
+                <p id="result-details"></p>
+                <button id="download-btn">Download PDF</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Carbide Cycle. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const operationType = document.getElementById('operation-type');
+            const cylindricalOptions = document.getElementById('cylindrical-options');
+            const surfaceOptions = document.getElementById('surface-options');
+            const calculateBtn = document.getElementById('calculate-btn');
+
+            const updateForm = () => {
+                const form = document.getElementById('calculator-form');
+                const inputs = form.querySelectorAll('input, select');
+                let valid = true;
+                inputs.forEach(input => {
+                    if (input.style.display !== 'none' && !input.value) {
+                        valid = false;
+                    }
+                });
+                calculateBtn.disabled = !valid;
+                if (!valid) {
+                    calculateBtn.classList.add('invalid');
+                    setTimeout(() => calculateBtn.classList.remove('invalid'), 200);
+                }
+            };
+
+            operationType.addEventListener('change', function() {
+                cylindricalOptions.style.display = this.value === 'cylindrical' ? 'block' : 'none';
+                surfaceOptions.style.display = this.value === 'surface' ? 'block' : 'none';
+                updateForm();
+            });
+
+            document.getElementById('calculator-form').addEventListener('input', updateForm);
+
+            calculateBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                // Calculate and display results
+                const result = "Calculation successful! Display results here.";
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result-details').innerText = result;
+            });
+
+            document.getElementById('download-btn').addEventListener('click', function() {
+                const resultDetails = document.getElementById('result-details').innerText;
+                const blob = new Blob([resultDetails], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'grinding_cycle_time.pdf';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+</body>
+</html>
