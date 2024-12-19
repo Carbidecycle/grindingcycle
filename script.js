@@ -1,4 +1,5 @@
 let calculatedTime = '';
+let enteredValues = '';
 
 function calculateTime() {
     const operationType = document.getElementById('operation-type').value;
@@ -13,9 +14,32 @@ function calculateTime() {
         return;
     }
 
-    // Common formula for grinding time
-    let time = (length * diameter) / (feedRate * speed);
-    
+    // Calculating time based on operation type
+    let time = 0;
+    let operation = '';
+
+    if (operationType === 'od') {
+        // Outer Diameter Grinding Formula
+        time = (length * diameter) / (feedRate * speed);
+        operation = "OD Grinding";
+    } else if (operationType === 'id') {
+        // Inner Diameter Grinding Formula
+        time = (length * diameter) / (feedRate * speed);
+        operation = "ID Grinding";
+    } else if (operationType === 'tapering') {
+        // Tapering Grinding Formula (using average diameter)
+        const averageDiameter = (diameter + parseFloat(document.getElementById('taper-diameter').value)) / 2;
+        time = (length * averageDiameter) / (feedRate * speed);
+        operation = "Tapering Grinding";
+    } else if (operationType === 'surface') {
+        // Surface Grinding Formula
+        time = (length * diameter) / (feedRate * speed); // Placeholder formula
+        operation = "Surface Grinding";
+    }
+
+    // Store entered values and time
+    enteredValues = `Operation Type: ${operation}\nLength: ${length} mm\nDiameter: ${diameter} mm\nFeed Rate: ${feedRate} mm/min\nSpeed: ${speed} rpm`;
+
     // Display the result
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = `<p>Calculated Time: ${time.toFixed(2)} minutes</p>`;
@@ -23,15 +47,17 @@ function calculateTime() {
     // Show the download button after calculation
     document.getElementById('download-button').classList.remove('hidden');
 
-    // Save calculated time for PDF download
+    // Save calculated time
     calculatedTime = time.toFixed(2);
 }
 
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text(`Calculated Time: ${calculatedTime} minutes`, 10, 10);
-    doc.save('calculation_result.pdf');
+    doc.text(`Calculation Result:`, 10, 10);
+    doc.text(`Operation Type: ${enteredValues}`, 10, 20);
+    doc.text(`Calculated Time: ${calculatedTime} minutes`, 10, 30);
+    doc.save('grinding_calculation_result.pdf');
 }
 
 // Automatically refresh the page when operation type is changed
