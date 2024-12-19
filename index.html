@@ -160,6 +160,10 @@
                 if (operation === 'tapering') {
                     taperDiameter = parseFloat(document.getElementById('taper-diameter').value);
                 }
+                let width = 0;
+                if (operation === 'surface') {
+                    width = parseFloat(document.getElementById('surface-width').value);
+                }
 
                 // Perform calculation based on operation type
                 if (operation === 'od') {
@@ -173,7 +177,6 @@
                     result = (length * (diameter + taperDiameter)) / (feedRate * speed);
                 } else if (operation === 'surface') {
                     // Formula for Surface Grinding
-                    const width = parseFloat(document.getElementById('surface-width').value);
                     result = (length * width) / (feedRate * speed);
                 }
 
