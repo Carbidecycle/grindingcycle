@@ -1,73 +1,71 @@
-let calculatedTime = '';
-let enteredValues = '';
-
-function calculateTime() {
-    const operationType = document.getElementById('operation-type').value;
-    const length = parseFloat(document.getElementById('length').value);
-    const diameter = parseFloat(document.getElementById('diameter').value);
-    const feedRate = parseFloat(document.getElementById('feed-rate').value);
-    const speed = parseFloat(document.getElementById('speed').value);
-
-    // Check if the required fields are filled
-    if (!length || !diameter || !feedRate || !speed) {
-        alert('Please fill in all required fields.');
-        return;
-    }
-
-    // Calculating time based on operation type
-    let time = 0;
-    let operation = '';
-
-    if (operationType === 'od') {
-        // Outer Diameter Grinding Formula
-        time = (length * diameter) / (feedRate * speed);
-        operation = "OD Grinding";
-    } else if (operationType === 'id') {
-        // Inner Diameter Grinding Formula
-        time = (length * diameter) / (feedRate * speed);
-        operation = "ID Grinding";
-    } else if (operationType === 'tapering') {
-        // Tapering Grinding Formula (using average diameter)
-        const averageDiameter = (diameter + parseFloat(document.getElementById('taper-diameter').value)) / 2;
-        time = (length * averageDiameter) / (feedRate * speed);
-        operation = "Tapering Grinding";
-    } else if (operationType === 'surface') {
-        // Surface Grinding Formula
-        time = (length * diameter) / (feedRate * speed); // Placeholder formula
-        operation = "Surface Grinding";
-    }
-
-    // Store entered values and time
-    enteredValues = `Operation Type: ${operation}\nLength: ${length} mm\nDiameter: ${diameter} mm\nFeed Rate: ${feedRate} mm/min\nSpeed: ${speed} rpm`;
-
-    // Display the result
+document.addEventListener('DOMContentLoaded', () => {
+    const operationType = document.getElementById('operation-type');
+    const odParameters = document.getElementById('od-parameters');
+    const idParameters = document.getElementById('id-parameters');
+    const taperingParameters = document.getElementById('tapering-parameters');
+    const surfaceParameters = document.getElementById('surface-parameters');
+    const calculateButton = document.getElementById('calculate-button');
     const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = `<p>Calculated Time: ${time.toFixed(2)} minutes</p>`;
+    const downloadButton = document.getElementById('download-button');
 
-    // Show the download button after calculation
-    document.getElementById('download-button').classList.remove('hidden');
+    operationType.addEventListener('change', () => {
+        const operation = operationType.value;
 
-    // Save calculated time
-    calculatedTime = time.toFixed(2);
-}
+        // Hide all sections by default
+        odParameters.classList.add('hidden');
+        idParameters.classList.add('hidden');
+        taperingParameters.classList.add('hidden');
+        surfaceParameters.classList.add('hidden');
 
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text(`Calculation Result:`, 10, 10);
-    doc.text(`Operation Type: ${enteredValues}`, 10, 20);
-    doc.text(`Calculated Time: ${calculatedTime} minutes`, 10, 30);
-    doc.save('grinding_calculation_result.pdf');
-}
+        // Show the corresponding section based on the operation type selected
+        if (operation === 'od') {
+            odParameters.classList.remove('hidden');
+        } else if (operation === 'id') {
+            idParameters.classList.remove('hidden');
+        } else if (operation === 'tapering') {
+            taperingParameters.classList.remove('hidden');
+        } else if (operation === 'surface') {
+            surfaceParameters.classList.remove('hidden');
+        }
+    });
 
-// Prevent page reload until calculation is done
-document.getElementById('operation-type').addEventListener('change', function() {
-    // Reset and hide result section after operation type change
-    document.getElementById('result').innerHTML = '';
-    document.getElementById('download-button').classList.add('hidden');
-});
+    calculateButton.addEventListener('click', () => {
+        const operation = operationType.value;
+        let result = 0;
 
-// Add a manual refresh button
-document.getElementById('refresh-button').addEventListener('click', function() {
-    location.reload(); // Refresh the page
+        // Get values from the form depending on the selected operation
+        const length = parseFloat(document.getElementById('length').value);
+        const diameter = parseFloat(document.getElementById('diameter').value);
+        const feedRate = parseFloat(document.getElementById('feed-rate').value);
+        const speed = parseFloat(document.getElementById('speed').value);
+        const taperDiameter = document.getElementById('taper-diameter') ? parseFloat(document.getElementById('taper-diameter').value) : 0;
+
+        // Perform calculation based on operation type
+        if (operation === 'od') {
+            result = (length * diameter) / (feedRate * speed);
+        } else if (operation === 'id') {
+            result = (length * diameter) / (feedRate * speed);
+        } else if (operation === 'tapering') {
+            result = (length * (diameter + taperDiameter)) / (feedRate * speed);
+        } else if (operation === 'surface') {
+            result = (length * diameter) / (feedRate * speed);
+        }
+
+        // Display the result
+        resultDiv.innerHTML = `<p>Calculated Time: ${result.toFixed(2)} minutes</p>`;
+
+        // Show the download button
+        downloadButton.classList.remove('hidden');
+    });
+
+    // Download the result as a PDF
+    window.downloadPDF = function () {
+        const pdfContent = `Grinding Operation Result\n\n${resultDiv.innerText}`;
+        const blob = new Blob([pdfContent], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'result.pdf';
+        a.click();
+    };
 });
