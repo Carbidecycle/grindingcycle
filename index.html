@@ -6,75 +6,6 @@
     <title>Carbide Cycle</title>
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        header {
-            background: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-        nav ul {
-            list-style: none;
-            padding: 0;
-        }
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-        }
-        main {
-            padding: 20px;
-        }
-        .hidden {
-            display: none;
-        }
-        #calculate-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        #calculate-button.disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        #download-button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background: #28a745;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        #refresh-button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        footer {
-            background: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -166,7 +97,7 @@
 
                 <button type="button" id="calculate-button" class="disabled" onclick="calculateTime()">Calculate</button>
                 <button type="button" id="download-button" class="hidden" onclick="downloadPDF()">Download Result</button>
-                <button type="button" id="refresh-button" class="hidden">Refresh</button>
+                <button type="button" id="refresh-button" class="hidden" onclick="refreshPage()">Refresh</button>
             </form>
 
             <div id="result"></div>
@@ -176,5 +107,11 @@
     <footer>
         <p>&copy; 2024 Carbide Cycle</p>
     </footer>
+
+    <script>
+        function refreshPage() {
+            window.location.reload();
+        }
+    </script>
 </body>
 </html>
