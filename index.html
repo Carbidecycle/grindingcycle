@@ -3,29 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grinding Cycle Time Calculator</title>
+    <title>Carbide Cycle</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+        main {
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        #calculate-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        #calculate-button.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #download-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        #refresh-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #ff6347;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Grinding Cycle Time Calculator</h1>
+        <h1>Carbide Cycle</h1>
+        <nav>
+            <ul>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#calculator">Calculator</a></li>
+            </ul>
+        </nav>
     </header>
 
     <main>
+        <section id="about">
+            <h2>About Us</h2>
+            <p>Welcome to the Ultimate Grinding Optimization Platform. This project is designed to empower manufacturers, engineers, and researchers to calculate the exact cycle time for grinding operations on tungsten carbide.</p>
+        </section>
+
         <section id="calculator">
             <h2>Machining Time Calculator</h2>
             <form id="grinding-form">
                 <label for="operation-type">Type of Grinding Operation:</label>
                 <select id="operation-type" name="operation-type" required>
                     <option value="">Select...</option>
-                    <option value="od">OD Grinding</option>
-                    <option value="id">ID Grinding</option>
+                    <option value="od">Outer Diameter Grinding</option>
+                    <option value="id">Inner Diameter Grinding</option>
                     <option value="tapering">Tapering Grinding</option>
                     <option value="surface">Surface Grinding</option>
                 </select>
 
-                <div id="parameters">
+                <!-- Parameters for OD Grinding -->
+                <div id="od-parameters" class="hidden">
                     <label for="length">Length (mm):</label>
                     <input type="number" id="length" name="length" min="0" required>
 
@@ -39,8 +120,42 @@
                     <input type="number" id="speed" name="speed" min="0" required>
                 </div>
 
-                <button type="button" id="calculate-button" onclick="calculateTime()">Calculate</button>
+                <!-- Parameters for Tapering Grinding -->
+                <div id="tapering-parameters" class="hidden">
+                    <label for="length">Length (mm):</label>
+                    <input type="number" id="length" name="length" min="0" required>
+
+                    <label for="diameter">Diameter (mm):</label>
+                    <input type="number" id="diameter" name="diameter" min="0" required>
+
+                    <label for="taper-diameter">Taper Diameter (mm):</label>
+                    <input type="number" id="taper-diameter" name="taper-diameter" min="0" required>
+
+                    <label for="feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+
+                    <label for="speed">Speed (rpm):</label>
+                    <input type="number" id="speed" name="speed" min="0" required>
+                </div>
+
+                <!-- Parameters for Surface Grinding -->
+                <div id="surface-parameters" class="hidden">
+                    <label for="length">Length (mm):</label>
+                    <input type="number" id="length" name="length" min="0" required>
+
+                    <label for="diameter">Diameter (mm):</label>
+                    <input type="number" id="diameter" name="diameter" min="0" required>
+
+                    <label for="feed-rate">Feed Rate (mm/min):</label>
+                    <input type="number" id="feed-rate" name="feed-rate" min="0" required>
+
+                    <label for="speed">Speed (rpm):</label>
+                    <input type="number" id="speed" name="speed" min="0" required>
+                </div>
+
+                <button type="button" id="calculate-button" class="disabled" onclick="calculateTime()">Calculate</button>
                 <button type="button" id="download-button" class="hidden" onclick="downloadPDF()">Download Result</button>
+                <button type="button" id="refresh-button" class="hidden" onclick="refreshPage()">Refresh</button>
             </form>
 
             <div id="result"></div>
@@ -48,9 +163,108 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 Grinding Cycle</p>
+        <p>&copy; 2024 Carbide Cycle</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const operationType = document.getElementById('operation-type');
+            const odParameters = document.getElementById('od-parameters');
+            const taperingParameters = document.getElementById('tapering-parameters');
+            const surfaceParameters = document.getElementById('surface-parameters');
+            const calculateButton = document.getElementById('calculate-button');
+            const refreshButton = document.getElementById('refresh-button');
+            const downloadButton = document.getElementById('download-button');
+            const resultDiv = document.getElementById('result');
+
+            // Event listener to show relevant parameters based on selected operation type
+            operationType.addEventListener('change', () => {
+                odParameters.classList.add('hidden');
+                taperingParameters.classList.add('hidden');
+                surfaceParameters.classList.add('hidden');
+                refreshButton.classList.add('hidden');
+                downloadButton.classList.add('hidden');
+                resultDiv.innerHTML = '';  // Clear result
+
+                if (operationType.value === 'od') {
+                    odParameters.classList.remove('hidden');
+                } else if (operationType.value === 'tapering') {
+                    taperingParameters.classList.remove('hidden');
+                } else if (operationType.value === 'surface') {
+                    surfaceParameters.classList.remove('hidden');
+                }
+            });
+        });
+
+        let calculatedTime = '';
+        let enteredValues = '';
+
+        // Function to calculate time
+        function calculateTime() {
+            const operationType = document.getElementById('operation-type').value;
+            const length = parseFloat(document.getElementById('length').value);
+            const diameter = parseFloat(document.getElementById('diameter').value);
+            const feedRate = parseFloat(document.getElementById('feed-rate').value);
+            const speed = parseFloat(document.getElementById('speed').value);
+
+            // Check if the required fields are filled
+            if (!length || !diameter || !feedRate || !speed) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            // Calculating time based on operation type
+            let time = 0;
+            let operation = '';
+
+            if (operationType === 'od') {
+                // Outer Diameter Grinding Formula
+                time = (length * diameter) / (feedRate * speed);
+                operation = "OD Grinding";
+            } else if (operationType === 'id') {
+                // Inner Diameter Grinding Formula
+                time = (length * diameter) / (feedRate * speed);
+                operation = "ID Grinding";
+            } else if (operationType === 'tapering') {
+                // Tapering Grinding Formula (using average diameter)
+                const averageDiameter = (diameter + parseFloat(document.getElementById('taper-diameter').value)) / 2;
+                time = (length * averageDiameter) / (feedRate * speed);
+                operation = "Tapering Grinding";
+            } else if (operationType === 'surface') {
+                // Surface Grinding Formula
+                time = (length * diameter) / (feedRate * speed); // Placeholder formula
+                operation = "Surface Grinding";
+            }
+
+            // Store entered values and time
+            enteredValues = `Operation Type: ${operation}\nLength: ${length} mm\nDiameter: ${diameter} mm\nFeed Rate: ${feedRate} mm/min\nSpeed: ${speed} rpm`;
+
+            // Display the result
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<p>Calculated Time: ${time.toFixed(2)} minutes</p>`;
+
+            // Show the download button after calculation
+            document.getElementById('download-button').classList.remove('hidden');
+            document.getElementById('refresh-button').classList.remove('hidden');
+
+            // Save calculated time
+            calculatedTime = time.toFixed(2);
+        }
+
+        // Function to download result as PDF
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`Calculation Result:`, 10, 10);
+            doc.text(`Operation Type: ${enteredValues}`, 10, 20);
+            doc.text(`Calculated Time: ${calculatedTime} minutes`, 10, 30);
+            doc.save('grinding_calculation_result.pdf');
+        }
+
+        // Function to refresh the page
+        function refreshPage() {
+            location.reload();  // This will refresh the page
+        }
+    </script>
 </body>
 </html>
