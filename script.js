@@ -23,6 +23,7 @@ function calculateTime() {
     // Show the download button after calculation
     document.getElementById('download-button').classList.remove('hidden');
 
+    // Save calculated time for PDF download
     calculatedTime = time.toFixed(2);
 }
 
@@ -32,3 +33,8 @@ function downloadPDF() {
     doc.text(`Calculated Time: ${calculatedTime} minutes`, 10, 10);
     doc.save('calculation_result.pdf');
 }
+
+// Automatically refresh the page when operation type is changed
+document.getElementById('operation-type').addEventListener('change', function() {
+    location.reload();
+});
