@@ -34,21 +34,20 @@ document.addEventListener('DOMContentLoaded', () => {
         let result = 0;
 
         // Get values from the form depending on the selected operation
-        const length = parseFloat(document.getElementById('length').value);
-        const diameter = parseFloat(document.getElementById('diameter').value);
-        const feedRate = parseFloat(document.getElementById('feed-rate').value);
-        const speed = parseFloat(document.getElementById('speed').value);
-        const taperDiameter = document.getElementById('taper-diameter') ? parseFloat(document.getElementById('taper-diameter').value) : 0;
+        const length = parseFloat(document.getElementById(operation + '-length').value);
+        const diameter = parseFloat(document.getElementById(operation + '-diameter').value);
+        const feedRate = parseFloat(document.getElementById(operation + '-feed-rate').value);
+        const speed = parseFloat(document.getElementById(operation + '-speed').value);
+        let taperDiameter = 0;
+        if (operation === 'tapering') {
+            taperDiameter = parseFloat(document.getElementById('taper-diameter').value);
+        }
 
         // Perform calculation based on operation type
-        if (operation === 'od') {
-            result = (length * diameter) / (feedRate * speed);
-        } else if (operation === 'id') {
+        if (operation === 'od' || operation === 'id' || operation === 'surface') {
             result = (length * diameter) / (feedRate * speed);
         } else if (operation === 'tapering') {
             result = (length * (diameter + taperDiameter)) / (feedRate * speed);
-        } else if (operation === 'surface') {
-            result = (length * diameter) / (feedRate * speed);
         }
 
         // Display the result
@@ -69,3 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
     };
 });
+
+function refreshPage() {
+    window.location.reload();
+}
