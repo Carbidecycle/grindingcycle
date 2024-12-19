@@ -119,6 +119,7 @@
             const calculateButton = document.getElementById('calculate-button');
             const resultDiv = document.getElementById('result');
             const downloadButton = document.getElementById('download-button');
+            const refreshButton = document.getElementById('refresh-button');
 
             operationType.addEventListener('change', () => {
                 const operation = operationType.value;
@@ -139,6 +140,11 @@
                 } else if (operation === 'surface') {
                     surfaceParameters.classList.remove('hidden');
                 }
+
+                // Hide result and download button when operation is changed
+                resultDiv.innerHTML = '';
+                downloadButton.classList.add('hidden');
+                refreshButton.classList.add('hidden');
             });
 
             calculateButton.addEventListener('click', () => {
@@ -165,8 +171,9 @@
                 // Display the result
                 resultDiv.innerHTML = `<p>Calculated Time: ${result.toFixed(2)} minutes</p>`;
 
-                // Show the download button
+                // Show the download and refresh buttons
                 downloadButton.classList.remove('hidden');
+                refreshButton.classList.remove('hidden');
             });
 
             // Download the result as a PDF
