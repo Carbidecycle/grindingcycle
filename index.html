@@ -6,6 +6,7 @@
     <title>Carbide Cycle</title>
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,79 +14,58 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-
         header {
-            background-color: #333;
+            background: #333;
             color: #fff;
-            padding: 10px 20px;
+            padding: 10px 0;
             text-align: center;
         }
-
-        header h1 {
-            margin: 0;
+        nav ul {
+            list-style: none;
+            padding: 0;
         }
-
-        nav a {
-            color: #fff;
+        nav ul li {
+            display: inline;
             margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
             text-decoration: none;
         }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
         main {
             padding: 20px;
         }
-
-        section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .hidden {
+            display: none;
         }
-
-        form label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        form input, form select, button {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #28a745;
-            color: white;
+        #calculate-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
             border: none;
             cursor: pointer;
         }
-
-        button:disabled {
-            background-color: #ccc;
+        #calculate-button.disabled {
+            background: #ccc;
             cursor: not-allowed;
         }
-
-        button#calculate-btn {
-            position: relative;
-            transition: transform 0.2s ease;
+        #download-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
         }
-
-        button#calculate-btn.invalid {
-            transform: translateX(-10px);
-        }
-
         footer {
-            text-align: center;
-            padding: 10px;
             background: #333;
             color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
         }
     </style>
 </head>
@@ -93,8 +73,10 @@
     <header>
         <h1>Carbide Cycle</h1>
         <nav>
-            <a href="#about">About Us</a>
-            <a href="#calculator">Calculator</a>
+            <ul>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#calculator">Calculator</a></li>
+            </ul>
         </nav>
     </header>
 
@@ -106,33 +88,32 @@
 
         <section id="calculator">
             <h2>Machining Time Calculator</h2>
-
-            <form id="calculator-form">
+            <form id="grinding-form">
                 <label for="operation-type">Type of Grinding Operation:</label>
                 <select id="operation-type" name="operation-type" required>
-                    <option value="">Select</option>
+                    <option value="">Select...</option>
                     <option value="cylindrical">Cylindrical Grinding</option>
                     <option value="surface">Surface Grinding</option>
                 </select>
 
-                <div id="cylindrical-options" style="display: none;">
+                <div id="cylindrical-options" class="hidden">
                     <label for="cylindrical-type">Cylindrical Type:</label>
-                    <select id="cylindrical-type" name="cylindrical-type" required>
-                        <option value="">Select</option>
+                    <select id="cylindrical-type" name="cylindrical-type">
+                        <option value="">Select...</option>
                         <option value="outer">Outer Diameter</option>
                         <option value="inner">Inner Diameter</option>
                         <option value="tapering">Tapering</option>
                     </select>
 
-                    <div id="cylindrical-params" style="display: none;">
+                    <div id="cylindrical-parameters" class="hidden">
                         <label for="length">Length (mm):</label>
                         <input type="number" id="length" name="length" min="0" required>
 
                         <label for="major-diameter">Major Diameter (mm):</label>
-                        <input type="number" id="major-diameter" name="major-diameter" min="0" required>
+                        <input type="number" id="major-diameter" name="major-diameter" min="0">
 
                         <label for="minor-diameter">Minor Diameter (mm):</label>
-                        <input type="number" id="minor-diameter" name="minor-diameter" min="0" required>
+                        <input type="number" id="minor-diameter" name="minor-diameter" min="0">
 
                         <label for="wheel-speed">Wheel Speed (rpm):</label>
                         <input type="number" id="wheel-speed" name="wheel-speed" min="0" required>
@@ -145,7 +126,7 @@
                     </div>
                 </div>
 
-                <div id="surface-options" style="display: none;">
+                <div id="surface-parameters" class="hidden">
                     <label for="surface-length">Length (mm):</label>
                     <input type="number" id="surface-length" name="surface-length" min="0" required>
 
@@ -155,78 +136,98 @@
                     <label for="table-speed">Table Speed (rpm):</label>
                     <input type="number" id="table-speed" name="table-speed" min="0" required>
 
-                    <label for="surface-feed-rate">Feed Rate (mm/min):</label>
-                    <input type="number" id="surface-feed-rate" name="surface-feed-rate" min="0" required>
+                    <label for="feed-rate-surface">Feed Rate (mm/min):</label>
+                    <input type="number" id="feed-rate-surface" name="feed-rate-surface" min="0" required>
 
                     <label for="depth-of-cut">Depth of Cut (mm):</label>
                     <input type="number" id="depth-of-cut" name="depth-of-cut" min="0" required>
                 </div>
 
-                <button id="calculate-btn" disabled>Know The Time</button>
+                <button type="button" id="calculate-button" class="disabled" onclick="calculateTime()">Know The Time</button>
+                <button type="button" id="download-button" class="hidden" onclick="downloadPDF()">Download Result</button>
             </form>
-
-            <div id="result" style="display: none;">
-                <h3>Calculation Result</h3>
-                <p id="result-details"></p>
-                <button id="download-btn">Download PDF</button>
-            </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 Carbide Cycle. All rights reserved.</p>
+        <p>&copy; 2024 Carbide Cycle</p>
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const operationType = document.getElementById('operation-type');
             const cylindricalOptions = document.getElementById('cylindrical-options');
-            const surfaceOptions = document.getElementById('surface-options');
-            const calculateBtn = document.getElementById('calculate-btn');
+            const surfaceParameters = document.getElementById('surface-parameters');
+            const cylindricalType = document.getElementById('cylindrical-type');
+            const cylindricalParameters = document.getElementById('cylindrical-parameters');
+            const calculateButton = document.getElementById('calculate-button');
+            const downloadButton = document.getElementById('download-button');
 
-            const updateForm = () => {
-                const form = document.getElementById('calculator-form');
-                const inputs = form.querySelectorAll('input, select');
-                let valid = true;
-                inputs.forEach(input => {
-                    if (input.style.display !== 'none' && !input.value) {
-                        valid = false;
-                    }
-                });
-                calculateBtn.disabled = !valid;
-                if (!valid) {
-                    calculateBtn.classList.add('invalid');
-                    setTimeout(() => calculateBtn.classList.remove('invalid'), 200);
+            let calculatedTime = '';
+
+            operationType.addEventListener('change', () => {
+                if (operationType.value === 'cylindrical') {
+                    cylindricalOptions.classList.remove('hidden');
+                    surfaceParameters.classList.add('hidden');
+                } else if (operationType.value === 'surface') {
+                    surfaceParameters.classList.remove('hidden');
+                    cylindricalOptions.classList.add('hidden');
+                } else {
+                    cylindricalOptions.classList.add('hidden');
+                    surfaceParameters.classList.add('hidden');
                 }
-            };
-
-            operationType.addEventListener('change', function() {
-                cylindricalOptions.style.display = this.value === 'cylindrical' ? 'block' : 'none';
-                surfaceOptions.style.display = this.value === 'surface' ? 'block' : 'none';
-                updateForm();
             });
 
-            document.getElementById('calculator-form').addEventListener('input', updateForm);
-
-            calculateBtn.addEventListener('click', function(event) {
-                event.preventDefault();
-                // Calculate and display results
-                const result = "Calculation successful! Display results here.";
-                document.getElementById('result').style.display = 'block';
-                document.getElementById('result-details').innerText = result;
+            cylindricalType.addEventListener('change', () => {
+                if (cylindricalType.value) {
+                    cylindricalParameters.classList.remove('hidden');
+                } else {
+                    cylindricalParameters.classList.add('hidden');
+                }
             });
 
-            document.getElementById('download-btn').addEventListener('click', function() {
-                const resultDetails = document.getElementById('result-details').innerText;
-                const blob = new Blob([resultDetails], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'grinding_cycle_time.pdf';
-                a.click();
-                URL.revokeObjectURL(url);
+            calculateButton.addEventListener('click', () => {
+                const resultSection = document.createElement('div');
+                let result = '';
+
+                if (operationType.value === 'cylindrical' && cylindricalType.value) {
+                    const length = parseFloat(document.getElementById('length').value);
+                    const majorDiameter = parseFloat(document.getElementById('major-diameter').value);
+                    const minorDiameter = parseFloat(document.getElementById('minor-diameter').value);
+                    const wheelSpeed = parseFloat(document.getElementById('wheel-speed').value);
+                    const feedRate = parseFloat(document.getElementById('feed-rate').value);
+                    const spindleSpeed = parseFloat(document.getElementById('spindle-speed').value);
+
+                    if (cylindricalType.value === 'outer' || cylindricalType.value === 'inner') {
+                        result = (length * (majorDiameter - minorDiameter)) / (wheelSpeed * feedRate * spindleSpeed);
+                    } else if (cylindricalType.value === 'tapering') {
+                        result = (length * (majorDiameter + minorDiameter)) / (2 * wheelSpeed * feedRate * spindleSpeed);
+                    }
+                } else if (operationType.value === 'surface') {
+                    const surfaceLength = parseFloat(document.getElementById('surface-length').value);
+                    const width = parseFloat(document.getElementById('width').value);
+                    const tableSpeed = parseFloat(document.getElementById('table-speed').value);
+                    const feedRateSurface = parseFloat(document.getElementById('feed-rate-surface').value);
+                    const depthOfCut = parseFloat(document.getElementById('depth-of-cut').value);
+
+                    result = (surfaceLength * width) / (feedRateSurface * tableSpeed * depthOfCut);
+                }
+
+                calculatedTime = result.toFixed(2);
+                resultSection.innerHTML = `<p>Calculated Time: ${calculatedTime} minutes</p>`;
+                document.querySelector('main').appendChild(resultSection);
+
+                // Show download button after calculation
+                downloadButton.classList.remove('hidden');
             });
         });
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`Calculated Time: ${calculatedTime} minutes`, 10, 10);
+            doc.save('calculation_result.pdf');
+        }
     </script>
 </body>
 </html>
